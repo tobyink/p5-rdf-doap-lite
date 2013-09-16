@@ -1,0 +1,12 @@
+# This file provides instructions for packaging.
+
+@prefix : <http://ontologi.es/doap-deps#>.
+
+`RDF-DOAP-Lite`
+	:runtime-recommendation [ :on "CPAN::Changes"^^:CpanId ];
+	:runtime-requirement    [ :on "CPAN::Meta 2.110320"^^:CpanId ];
+	:runtime-requirement    [ :on "Scalar::Util 1.24"^^:CpanId ];
+	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
+	:develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
+	.
+
