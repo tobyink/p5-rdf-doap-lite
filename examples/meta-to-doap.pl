@@ -8,7 +8,7 @@ my $doap = RDF::DOAP::Lite->new(
 	meta    => get_meta(),
 	changes => get_changes(),
 );
-$doap->doap_ttl( \*STDOUT );
+$doap->doap_xml( \*STDOUT );
 
 sub get_meta { CPAN::Meta->load_json_string(<<'END_META') } sub get_changes { CPAN::Changes->load_string(<<'END_CHANGES') }
 {

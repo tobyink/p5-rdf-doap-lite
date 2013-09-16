@@ -116,6 +116,13 @@ my %LICENSE = qw(
 	zlib            http://www.zlib.net/zlib_license.html
 );
 
+my %REPO = qw(
+	cvs      CVS
+	git      Git
+	hg       Hg
+	svn      SVN
+);
+
 sub doap_ttl
 {
 	my $self = shift;
@@ -141,7 +148,18 @@ sub doap_ttl
 	printf {$fh} "  :category [ rdfs:label %s ];\n", turtle_literal($_) for grep defined, $meta->keywords;
 	printf {$fh} "  :developer %s;\n", turtle_person($_) for grep defined, $meta->authors;
 	printf {$fh} "  :helper %s;\n", turtle_person($_) for grep defined, @{ $meta->{x_contributors} || [] };
-	printf {$fh} "  :license <$_>;\n", $_ for map { $LICENSE{$_} || ()  } $meta->licenses;
+	printf {$fh} "  :license <%s>;\n", $_ for map { $LICENSE{$_} || ()  } $meta->licenses;
+	my $res = $meta->resources;
+	printf {$fh} "  :homepage <%s>;\n", $_ for grep defined, $res->{homepage};
+	printf {$fh} "  :bug-database <%s>;\n", $_ for grep defined, $res->{bugtracker}{web};
+	if (my $repo = $res->{repository})
+	{
+		printf {$fh} "  :repository [\n";
+		printf {$fh} "    a :%sRepository;\n", $_ for map { $REPO{$_} || '' } $repo->{type};
+		printf {$fh} "    :browse <%s>;\n", $_ for grep defined, $repo->{web};
+		printf {$fh} "    :location <%s>;\n", $_ for grep defined, $repo->{url};
+		printf {$fh} "  ];\n";
+	}
 	for my $r (map $_->releases, grep defined, $self->changes)
 	{
 		$r->date
@@ -164,6 +182,7 @@ sub doap_xml
   xmlns="http://usefulinc.com/ns/doap#"
   xmlns:dc="http://purl.org/dc/terms/"
   xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
 	HEADER
 	
@@ -176,6 +195,18 @@ sub doap_xml
 	printf {$fh} "  <developer>\n    %s\n  </developer>\n", xml_person($_) for grep defined, $meta->authors;
 	printf {$fh} "  <helper>\n    %s\n  </helper>\n", xml_person($_) for grep defined, @{ $meta->{x_contributors} || [] };
 	printf {$fh} "  <license rdf:resource=\"%s\" />\n", xml_literal($_) for map { $LICENSE{$_} || ()  } $meta->licenses;
+	my $res = $meta->resources;
+	printf {$fh} "  <homepage rdf:resource=\"%s\" />\n", xml_literal($_) for grep defined, $res->{homepage};
+	printf {$fh} "  <bug-database rdf:resource=\"%s\" />\n", xml_literal($_) for grep defined, $res->{bugtracker}{web};
+	if (my $repo = $res->{repository})
+	{
+		printf {$fh} "  <repository>\n";
+		printf {$fh} "    <%sRepository>\n", $_ for map { $REPO{$_} || '' } $repo->{type};
+		printf {$fh} "      <browse rdf:resource=\"%s\" />\n", xml_literal($_) for grep defined, $repo->{web};
+		printf {$fh} "      <location rdf:resource=\"%s\" />\n", xml_literal($_) for grep defined, $repo->{url};
+		printf {$fh} "    </%sRepository>\n", $_ for map { $REPO{$_} || '' } $repo->{type};
+		printf {$fh} "  </repository>\n";
+	}
 	for my $r (map $_->releases, grep defined, $self->changes)
 	{
 		$r->date
