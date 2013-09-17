@@ -139,8 +139,10 @@ sub doap_ttl
 	HEADER
 	
 	my $meta = $self->meta or die("no meta!");
+	my $res  = $meta->resources;
+	my $uri  = $res->{X_identifier} ? "<$res->{X_identifier}>" : '[]';
 	
-	printf {$fh} "[]\n";
+	printf {$fh} "$uri\n";
 	printf {$fh} "  a :Project;\n";
 	printf {$fh} "  :name %s;\n", turtle_literal($_) for grep defined, $meta->name;
 	printf {$fh} "  :shortdesc %s;\n", turtle_literal($_) for grep defined, $meta->abstract;
@@ -149,7 +151,6 @@ sub doap_ttl
 	printf {$fh} "  :developer %s;\n", turtle_person($_) for grep defined, $meta->authors;
 	printf {$fh} "  :helper %s;\n", turtle_person($_) for grep defined, @{ $meta->{x_contributors} || [] };
 	printf {$fh} "  :license <%s>;\n", $_ for map { $LICENSE{$_} || ()  } $meta->licenses;
-	my $res = $meta->resources;
 	printf {$fh} "  :homepage <%s>;\n", $_ for grep defined, $res->{homepage};
 	printf {$fh} "  :bug-database <%s>;\n", $_ for grep defined, $res->{bugtracker}{web};
 	if (my $repo = $res->{repository})
@@ -183,10 +184,20 @@ sub doap_xml
   xmlns:dc="http://purl.org/dc/terms/"
   xmlns:foaf="http://xmlns.com/foaf/0.1/"
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 	HEADER
 	
 	my $meta = $self->meta or die("no meta!");
+	my $res  = $meta->resources;
+	
+	if ($res->{X_identifier})
+	{
+		printf {$fh} "  rdf:about=\"%s\">\n", xml_literal($res->{X_identifier});
+	}
+	else
+	{
+		printf {$fh} "  >\n";
+	}
 	
 	printf {$fh} "  <name>%s</name>\n", xml_literal($_) for grep defined, $meta->name;
 	printf {$fh} "  <shortdesc>%s</shortdesc>\n", xml_literal($_) for grep defined, $meta->abstract;
@@ -195,7 +206,6 @@ sub doap_xml
 	printf {$fh} "  <developer>\n    %s\n  </developer>\n", xml_person($_) for grep defined, $meta->authors;
 	printf {$fh} "  <helper>\n    %s\n  </helper>\n", xml_person($_) for grep defined, @{ $meta->{x_contributors} || [] };
 	printf {$fh} "  <license rdf:resource=\"%s\" />\n", xml_literal($_) for map { $LICENSE{$_} || ()  } $meta->licenses;
-	my $res = $meta->resources;
 	printf {$fh} "  <homepage rdf:resource=\"%s\" />\n", xml_literal($_) for grep defined, $res->{homepage};
 	printf {$fh} "  <bug-database rdf:resource=\"%s\" />\n", xml_literal($_) for grep defined, $res->{bugtracker}{web};
 	if (my $repo = $res->{repository})
