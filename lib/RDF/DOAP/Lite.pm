@@ -310,6 +310,8 @@ L<http://rt.cpan.org/Dist/Display.html?Queue=RDF-DOAP-Lite>.
 
 =head1 SEE ALSO
 
+This module comes with a bundled command-line tool, L<cpan2doap>.
+
 For parsing DOAP data, see L<RDF::DOAP>.
 
 For general RDF processing, use L<RDF::Trine> and L<RDF::Query>.
