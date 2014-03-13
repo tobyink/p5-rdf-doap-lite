@@ -4,3 +4,9 @@
 	issued  2013-09-17;
 	label   "Initial release".
 
+`RDF-DOAP-Lite 0.002 cpan:TOBYINK`
+	issued  2013-03-13;
+	changeset [
+		item "Fix issues parsing META.json's person-like strings."^^Bugfix;
+	].
+
